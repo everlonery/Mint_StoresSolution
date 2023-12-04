@@ -71,6 +71,10 @@
     <Build Include="Tables\AssortmentRecords.sql" />
     <Build Include="Tables\TaxGroups.sql" />
     <Build Include="Tables\MeasurementUnits.sql" />
+    <Build Include="StoredProcedures\sp_Cities_Select.sql" />
+    <Build Include="StoredProcedures\sp_Cities_Insert.sql" />
+    <Build Include="StoredProcedures\sp_Cities_Delete.sql" />
+    <Build Include="StoredProcedures\sp_Cities_Update.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Mint_StoresDatabase.refactorlog" />
