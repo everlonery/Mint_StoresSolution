@@ -77,4 +77,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="EmploymentDate" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2a38cdb7-784d-4893-abb3-aea36c387c3d" ChangeDateTime="12/04/2023 11:10:41">
+    <Property Name="ElementName" Value="[dbo].[AssortmentRecords].[IdTaxGroup]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[AssortmentRecords]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="TaxGroupId" />
+  </Operation>
 </Operations>
