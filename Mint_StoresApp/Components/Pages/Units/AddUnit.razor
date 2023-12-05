@@ -1,0 +1,76 @@
+﻿@page "/add-unit"
+@inject NavigationManager NavigationManager
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
+@rendermode InteractiveServer
+<PageTitle>Add unit</PageTitle>
+<h3>Додати одиницю виміру</h3>
+<hr />
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            @if (showSuccessMessage)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span>Вимірювання успішно додано!</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @onclick="CloseMessage"></button>
+                </div>
+            }
+            else if (showErrorMessage)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span>Виникла помилка під час додавання вимірювання.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @onclick="CloseMessage"></button>
+                </div>
+            }
+            <EditForm Model="@unit" OnValidSubmit="Submit">
+                <div class="mb-3">
+                    <label for="unitName" class="form-label">Назва одиниці вимірювання</label>
+                    <InputText id="unitName" @bind-Value="unit.Name" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-success">Додати</button>
+                    <button type="button" class="btn btn-danger" @onclick="Cancel">Скасувати</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+<style>
+    .alert-dismissible .btn-close {
+        font-size: 0.5rem;
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 0.5rem 0.5rem;
+    }
+</style>
+
+@code {
+    MeasurementUnit unit = new();
+    UnitsController dataController = new();
+    bool showSuccessMessage = false;
+    bool showErrorMessage = false;
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("/units");
+    }
+
+    async Task Submit()
+    {
+        var result = await dataController.InsertUnit(unit);
+        if (result)
+            showSuccessMessage = true;
+        else
+            showErrorMessage = true;
+        unit = new();
+    }
+
+    void CloseMessage()
+    {
+        showSuccessMessage = false;
+        showErrorMessage = false;
+    }
+}
+

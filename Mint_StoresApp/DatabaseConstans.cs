@@ -19,5 +19,11 @@ namespace Mint_StoresApp
         public const string DeleteRole = "sp_Roles_Delete";
         public const string UpdateRole = "sp_Roles_Update";
         #endregion
+        #region Units
+        public const string SelectUnits = "sp_Units_Select";
+        public const string InsertUnit = "sp_Units_Insert";
+        public const string DeleteUnit = "sp_Units_Delete";
+        public const string UpdateUnit = "sp_Units_Update";
+        #endregion
     }
 }

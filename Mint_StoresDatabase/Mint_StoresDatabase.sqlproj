@@ -60,6 +60,7 @@
     <Folder Include="StoredProcedures" />
     <Folder Include="StoredProcedures\Cities" />
     <Folder Include="StoredProcedures\Roles" />
+    <Folder Include="StoredProcedures\Units" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Products.sql" />
@@ -81,6 +82,10 @@
     <Build Include="StoredProcedures\Roles\sp_Roles_Insert.sql" />
     <Build Include="StoredProcedures\Roles\sp_Roles_Delete.sql" />
     <Build Include="StoredProcedures\Roles\sp_Roles_Update.sql" />
+    <Build Include="StoredProcedures\Units\sp_Units_Delete.sql" />
+    <Build Include="StoredProcedures\Units\sp_Units_Insert.sql" />
+    <Build Include="StoredProcedures\Units\sp_Units_Select.sql" />
+    <Build Include="StoredProcedures\Units\sp_Units_Update.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Mint_StoresDatabase.refactorlog" />
