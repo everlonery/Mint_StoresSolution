@@ -1,10 +1,10 @@
-﻿@page "/update-city"
+﻿@page "/add-role"
 @inject NavigationManager NavigationManager
 @using Mint_StoresApp.DataControllers
 @using Mint_StoresApp.Models
 @rendermode InteractiveServer
-<PageTitle>Update city</PageTitle>
-<h3>Оновити місто</h3>
+<PageTitle>Add role</PageTitle>
+<h3>Додати роль</h3>
 <hr />
 <div class="container">
     <div class="row">
@@ -12,24 +12,24 @@
             @if (showSuccessMessage)
             {
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <span>Місто успішно оновлено!</span>
+                    <span>Роль успішно додано!</span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @onclick="CloseMessage"></button>
                 </div>
             }
             else if (showErrorMessage)
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <span>Виникла помилка під час оновлення міста.</span>
+                    <span>Виникла помилка під час додавання ролі.</span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @onclick="CloseMessage"></button>
                 </div>
             }
-            <EditForm Model="@city" OnValidSubmit="Submit">
+            <EditForm Model="@role" OnValidSubmit="Submit">
                 <div class="mb-3">
-                    <label for="cityName" class="form-label">Назва міста</label>
-                    <InputText id="cityName" @bind-Value="city.Name" class="form-control" />
+                    <label for="roleName" class="form-label">Назва ролі</label>
+                    <InputText id="roleName" @bind-Value="role.Name" class="form-control" />
                 </div>
                 <div class="mb-3">
-                    <button type="submit" class="btn btn-success">Змінити</button>
+                    <button type="submit" class="btn btn-success">Додати</button>
                     <button type="button" class="btn btn-danger" @onclick="Cancel">Скасувати</button>
                 </div>
             </EditForm>
@@ -48,42 +48,23 @@
 </style>
 
 @code {
-
-    City city = new();
-    CitiesController dataController = new();
+    Role role = new();
+    RolesController dataController = new();
     bool showSuccessMessage = false;
     bool showErrorMessage = false;
-
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-
-        var uri = new Uri(NavigationManager.Uri);
-        var queryString = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        var json = queryString["json"];
-
-        if (!string.IsNullOrEmpty(json))
-        {
-            var result = System.Text.Json.JsonSerializer.Deserialize<City>(Uri.UnescapeDataString(json));
-            if (result != null)
-                city = result;
-        }
-    }
-
     void Cancel()
     {
-        NavigationManager.NavigateTo("/cities");
+        NavigationManager.NavigateTo("/roles");
     }
 
     async Task Submit()
     {
-        var result = await dataController.UpdateCity(city);
+        var result = await dataController.InsertRole(role);
         if (result)
             showSuccessMessage = true;
         else
             showErrorMessage = true;
+        role = new();
     }
 
     void CloseMessage()
