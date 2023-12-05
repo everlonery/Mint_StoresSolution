@@ -25,5 +25,11 @@ namespace Mint_StoresApp
         public const string DeleteUnit = "sp_Units_Delete";
         public const string UpdateUnit = "sp_Units_Update";
         #endregion
+        #region Groups
+        public const string SelectGroups = "sp_Groups_Select";
+        public const string InsertGroup = "sp_Groups_Insert";
+        public const string DeleteGroup = "sp_Groups_Delete";
+        public const string UpdateGroup = "sp_Groups_Update";
+        #endregion
     }
 }

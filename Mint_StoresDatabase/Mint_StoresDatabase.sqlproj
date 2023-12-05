@@ -61,6 +61,8 @@
     <Folder Include="StoredProcedures\Cities" />
     <Folder Include="StoredProcedures\Roles" />
     <Folder Include="StoredProcedures\Units" />
+    <Folder Include="StoredProcedures\Users" />
+    <Folder Include="StoredProcedures\TaxGroups" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Products.sql" />
@@ -86,6 +88,12 @@
     <Build Include="StoredProcedures\Units\sp_Units_Insert.sql" />
     <Build Include="StoredProcedures\Units\sp_Units_Select.sql" />
     <Build Include="StoredProcedures\Units\sp_Units_Update.sql" />
+    <Build Include="StoredProcedures\Users\sp_Users_Delete.sql" />
+    <Build Include="StoredProcedures\Users\sp_Users_Insert.sql" />
+    <Build Include="StoredProcedures\TaxGroups\sp_Groups_Delete.sql" />
+    <Build Include="StoredProcedures\TaxGroups\sp_Groups_Insert.sql" />
+    <Build Include="StoredProcedures\TaxGroups\sp_Groups_Select.sql" />
+    <Build Include="StoredProcedures\TaxGroups\sp_Groups_Update.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Mint_StoresDatabase.refactorlog" />
