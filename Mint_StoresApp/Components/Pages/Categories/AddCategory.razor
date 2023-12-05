@@ -1,0 +1,94 @@
+﻿@page "/add-category"
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
+@rendermode InteractiveServer
+<PageTitle>Add category</PageTitle>
+<h3>Додати категорію</h3>
+<hr />
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            @if (showSuccessMessage)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span>Успішно додано!</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @onclick="CloseMessage"></button>
+                </div>
+            }
+            else if (showErrorMessage)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span>Виникла помилка під час додавання.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" @onclick="CloseMessage"></button>
+                </div>
+            }
+            <EditForm Model="@category" OnValidSubmit="Submit">
+                <div class="mb-3">
+                    <label for="categoryName" class="form-label">Назва категорії</label>
+                    <InputText id="categoryName" @bind-Value="category.Name" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label for="categoryParent" class="form-label">Батьківська категорія</label>
+                    <InputNumber id="categoryParent" @bind-Value="category.ParentId" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-success">Додати</button>
+                    <button type="button" class="btn btn-danger" @onclick="Cancel">Скасувати</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+<style>
+    .alert-dismissible .btn-close {
+        font-size: 0.5rem;
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 0.5rem 0.5rem;
+    }
+</style>
+
+@code {
+    Category category = new();
+    CategoriesController dataController = new();
+    bool showSuccessMessage = false;
+    bool showErrorMessage = false;
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("/categories");
+    }
+
+    async Task Submit()
+    {
+        try
+        {
+            var result = await dataController.InsertCategory(category);
+            if (result)
+                showSuccessMessage = true;
+            else
+                showErrorMessage = true;
+            category = new();
+        }
+        catch(Exception ex)
+        {
+            LogExceptionToConsole(ex.Message);
+        }
+    }
+
+    [JSInvokable]
+    public void LogExceptionToConsole(string message)
+    {
+        JSRuntime.InvokeAsync<object>("console.log", $"Exception: {message}");
+    }
+
+    void CloseMessage()
+    {
+        showSuccessMessage = false;
+        showErrorMessage = false;
+    }
+}
+

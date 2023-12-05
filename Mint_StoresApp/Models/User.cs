@@ -6,7 +6,7 @@
         public string LastName { get; set; } = String.Empty;
         public string FirstName { get; set; } = String.Empty;
         public string ParentName { get; set; } = String.Empty;
-        public DateOnly BirthDate { get; set; }
+        public DateTime BirthDate { get; set; } = DateTime.Now.Date;
         public bool IsActive { get; set; }
         public string Phone { get; set; } = String.Empty;
         public string? Email { get; set; }

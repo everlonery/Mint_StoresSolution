@@ -1,4 +1,6 @@
-﻿namespace Mint_StoresApp.Models
+﻿using Mint_StoresApp.DataControllers;
+
+namespace Mint_StoresApp.Models
 {
     public class Category
     {

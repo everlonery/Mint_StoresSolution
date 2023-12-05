@@ -31,5 +31,18 @@ namespace Mint_StoresApp
         public const string DeleteGroup = "sp_Groups_Delete";
         public const string UpdateGroup = "sp_Groups_Update";
         #endregion
+        #region Users
+        public const string SelectUsers = "sp_Users_Select";
+        public const string InsertUser = "sp_Users_Insert";
+        public const string DeleteUser = "sp_Users_Delete";
+        public const string UpdateUser = "sp_Users_Update";
+        #endregion
+        #region Categories
+        public const string SelectCategories = "sp_Categories_Select";
+        public const string SelectCategory = "sp_Categories_SelectById";
+        public const string InsertCategory = "sp_Categories_Insert";
+        public const string DeleteCategory = "sp_Categories_Delete";
+        public const string UpdateCategory = "sp_Categories_Update";
+        #endregion
     }
 }
