@@ -4,28 +4,15 @@ using System.Data;
 
 namespace Mint_StoresApp.DataControllers
 {
-    public class CitiesController
+    public class StoresController
     {
-        public async Task<List<City>> SelectCities()
+        public async Task<IEnumerable<Store>> SelectStores()
         {
             using (var connection = DatabaseConstans.GetConnection())
             {
                 connection.Open();
-                var rows = await connection.QueryAsync<City>(
-                    DatabaseConstans.SelectCities,
-                    commandType: CommandType.StoredProcedure
-                    );
-                return rows.ToList();
-            }
-        }
-
-        public async Task<IEnumerable<City>> SelectCities_Radzen()
-        {
-            using (var connection = DatabaseConstans.GetConnection())
-            {
-                connection.Open();
-                var rows = await connection.QueryAsync<City>(
-                    DatabaseConstans.SelectCities,
+                var rows = await connection.QueryAsync<Store>(
+                    DatabaseConstans.SelectStores,
                     commandType: CommandType.StoredProcedure
                     );
                 return rows;
@@ -39,7 +26,7 @@ namespace Mint_StoresApp.DataControllers
                 connection.Open();
                 var rows = await connection.QueryAsync<City>(
                     DatabaseConstans.InsertCity,
-                    new {Name = city.Name},
+                    new { Name = city.Name },
                     commandType: CommandType.StoredProcedure
                     );
                 return true;
@@ -58,14 +45,14 @@ namespace Mint_StoresApp.DataControllers
                 return true;
             }
         }
-        public async Task<bool> UpdateCity(City city)
+        public async Task<bool> UpdateStore(Store store)
         {
             using (var connection = DatabaseConstans.GetConnection())
             {
                 connection.Open();
-                var rows = await connection.QueryAsync<City>(
-                    DatabaseConstans.UpdateCity,
-                    new { CityId = city.CityId, Name = city.Name},
+                var rows = await connection.QueryAsync<Store>(
+                    DatabaseConstans.UpdateStore,
+                    new { StoreId = store.StoreId, Name = store.Name, Phone = store.Phone, Email = store.Email, Address = store.Address, ZipCode = store.ZipCode, CityId = store.CityId},
                     commandType: CommandType.StoredProcedure
                     );
                 return true;

@@ -1,0 +1,116 @@
+﻿@page "/cities-radzen"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
+@rendermode InteractiveServer
+<h3>Міста (Radzen)</h3>
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(cityToInsert != null  || cityToUpdate != null)"/>
+<RadzenDataGrid
+    @ref = "citiesGrid"
+    Data="@cities" 
+    TItem="City" 
+    AllowSorting="true" 
+    AllowMultiColumnSorting="true" 
+    AllowPaging="true" 
+    PageSize="5" 
+    AllowFiltering="true" 
+    FilterMode="FilterMode.Simple" 
+    EditMode="DataGridEditMode.Single"
+    RowCreate="@OnCreateRow"
+    RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="City" Property="CityId" Title="ID" Frozen="true"/>
+        <RadzenDataGridColumn TItem="City" Property="Name" Title="Назва">
+            <EditTemplate Context="city">
+                <RadzenTextBox @bind-Value="city.Name" Name="CityName"/>
+                <RadzenRequiredValidator Text="Поле не має бути пустим!" Component="CityName" Popup="true"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="City" Context="city" Filterable="false" Sortable = "false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="city">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(city))" @onclick:stopPropagation="true"/>
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(city))" />
+            </Template>
+            <EditTemplate Context="city">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(city))"/>
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(city))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    IEnumerable<City>? cities;
+    CitiesController controller = new();
+    RadzenDataGrid<City> citiesGrid = new();
+
+    City? cityToInsert;
+    City? cityToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        cities = await controller.SelectCities_Radzen();
+    }
+
+    void Reset()
+    {
+        cityToInsert = null;
+        cityToUpdate = null;
+    }
+
+    async Task SaveRow(City city)
+    {
+        await citiesGrid.UpdateRow(city);
+    }
+
+    async Task InsertRow()
+    {
+        cityToInsert = new City();
+        await citiesGrid.InsertRow(cityToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if(cityToInsert != null)
+            await controller.InsertCity(cityToInsert);
+        cityToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(City city)
+    {
+        cityToUpdate = city;
+        await citiesGrid.EditRow(city);
+    }
+
+    async Task OnUpdateRow(City city)
+    {
+        Reset();
+        await controller.UpdateCity(city);
+    }
+
+    async Task CancelEdit(City city)
+    {
+        Reset();
+        citiesGrid.CancelEditRow(city);
+        await Refresh();
+    }
+
+    async Task DeleteRow(City city)
+    {
+        Reset();
+        if(cities!=null)
+        {
+            if (cities.Contains(city))
+                await controller.DeleteCity(city);
+            else
+                citiesGrid.CancelEditRow(city);
+        }
+        await Refresh();
+    }
+
+}

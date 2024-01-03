@@ -1,10 +1,148 @@
 ﻿@page "/stores"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
 @rendermode InteractiveServer
-
-<PageTitle>Stores</PageTitle>
-
 <h3>Магазини</h3>
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(storeToInsert != null  || storeToUpdate != null)" />
+
+<RadzenDataGrid @ref="storesGrid"
+                Data="@stores"
+                TItem="Store"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="Store" Property="StoreId" Title="ID" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="Store" Property="Name" Title="Назва" Filterable="false" Sortable="false">
+            <EditTemplate Context="store">
+                <RadzenTextBox @bind-Value="store.Name" Name="StoreName" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="StoreName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Store" Property="Phone" Title="Телефон" Filterable="false" Sortable="false">
+            <EditTemplate Context="store">
+                <RadzenTextBox @bind-Value="store.Phone" Name="StorePhone" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="StorePhone" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Store" Property="Email" Title="Електронна адреса" Filterable="false" Sortable="false">
+            <EditTemplate Context="store">
+                <RadzenTextBox @bind-Value="store.Email" Name="StoreEmail" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Store" Property="Address" Title="Адреса" Filterable="false" Sortable="false">
+            <EditTemplate Context="store">
+                <RadzenTextBox @bind-Value="store.Address" Name="StoreAddress"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Store" Property="ZipCode" Title="Поштовий індекс" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="Store" Context="store" Title="Місто" Filterable="false" Sortable="false">
+            <Template Context="store">
+                @(cities.Where(city => city.CityId == store.CityId).First().Name)
+            </Template>
+            <EditTemplate Context="store">
+                <RadzenDropDown Data="@cities" TValue="int" @bind-Value="store.CityId" Placeholder="Виберіть місто" TextProperty="Name" ValueProperty="CityId"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Store" Context="store" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="store">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(store))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(store))" />
+            </Template>
+            <EditTemplate Context="store">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(store))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(store))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
 
 @code {
+    IEnumerable<Store>? stores;
+    IEnumerable<City> cities = new List<City>();
+
+    StoresController controller = new();
+    CitiesController citiesController = new();
+    RadzenDataGrid<Store> storesGrid = new();
+
+    Store? storeToInsert;
+    Store? storeToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var data = await citiesController.SelectCities();
+        if (data != null)
+            cities = data;
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        stores = await controller.SelectStores();
+    }
+
+    void Reset()
+    {
+        storeToInsert = null;
+        storeToUpdate = null;
+    }
+
+    async Task SaveRow(Store store)
+    {
+        await storesGrid.UpdateRow(store);
+    }
+
+    async Task InsertRow()
+    {
+        storeToInsert = new Store();
+        await storesGrid.InsertRow(storeToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        // if (storeToInsert != null)
+        //     await controller.InsertStore(storeToInsert);
+        // storeToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(Store store)
+    {
+        storeToUpdate = store;
+        await storesGrid.EditRow(store);
+    }
+
+    async Task OnUpdateRow(Store store)
+    {
+        Reset();
+        await controller.UpdateStore(store);
+    }
+
+    async Task CancelEdit(Store store)
+    {
+        Reset();
+        storesGrid.CancelEditRow(store);
+        await Refresh();
+    }
+
+    async Task DeleteRow(Store store)
+    {
+        // Reset();
+        // if (stores != null)
+        // {
+        //     if (stores.Contains(store))
+        //         await controller.DeleteStore(store);
+        //     else
+        //         storesGrid.CancelEditRow(store);
+        // }
+        await Refresh();
+    }
 
 }

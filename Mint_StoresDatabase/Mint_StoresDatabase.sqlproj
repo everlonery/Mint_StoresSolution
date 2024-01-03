@@ -64,6 +64,7 @@
     <Folder Include="StoredProcedures\Users" />
     <Folder Include="StoredProcedures\TaxGroups" />
     <Folder Include="StoredProcedures\Categories" />
+    <Folder Include="StoredProcedures\Stores" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Products.sql" />
@@ -102,6 +103,10 @@
     <Build Include="StoredProcedures\Categories\sp_Categories_Select.sql" />
     <Build Include="StoredProcedures\Categories\sp_Categories_Update.sql" />
     <Build Include="StoredProcedures\Categories\sp_Categories_SelectById.sql" />
+    <Build Include="StoredProcedures\Stores\sp_Stores_Delete.sql" />
+    <Build Include="StoredProcedures\Stores\sp_Stores_Insert.sql" />
+    <Build Include="StoredProcedures\Stores\sp_Stores_Select.sql" />
+    <Build Include="StoredProcedures\Stores\sp_Stores_Update.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Mint_StoresDatabase.refactorlog" />

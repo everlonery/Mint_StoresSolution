@@ -13,6 +13,12 @@ namespace Mint_StoresApp
         public const string DeleteCity = "sp_Cities_Delete";
         public const string UpdateCity = "sp_Cities_Update";
         #endregion
+        #region Stores
+        public const string SelectStores = "sp_Stores_Select";
+        public const string InsertStore = "sp_Stores_Insert";
+        public const string DeleteStore = "sp_Stores_Delete";
+        public const string UpdateStore = "sp_Stores_Update";
+        #endregion
         #region Roles
         public const string SelectRoles = "sp_Roles_Select";
         public const string InsertRole = "sp_Roles_Insert";
