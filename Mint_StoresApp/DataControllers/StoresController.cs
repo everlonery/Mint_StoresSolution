@@ -19,27 +19,27 @@ namespace Mint_StoresApp.DataControllers
             }
         }
 
-        public async Task<bool> InsertCity(City city)
+        public async Task<bool> InsertStore(Store store)
         {
             using (var connection = DatabaseConstans.GetConnection())
             {
                 connection.Open();
-                var rows = await connection.QueryAsync<City>(
-                    DatabaseConstans.InsertCity,
-                    new { Name = city.Name },
+                var rows = await connection.QueryAsync<Store>(
+                    DatabaseConstans.InsertStore,
+                    new { Name = store.Name, Phone = store.Phone, Email = store.Email, Address = store.Address, ZipCode = store.ZipCode, CityId = store.CityId},
                     commandType: CommandType.StoredProcedure
                     );
                 return true;
             }
         }
-        public async Task<bool> DeleteCity(City city)
+        public async Task<bool> DeleteStore(Store store)
         {
             using (var connection = DatabaseConstans.GetConnection())
             {
                 connection.Open();
-                var rows = await connection.QueryAsync<City>(
-                    DatabaseConstans.DeleteCity,
-                    new { CityId = city.CityId },
+                var rows = await connection.QueryAsync<Store>(
+                    DatabaseConstans.DeleteStore,
+                    new { StoreId = store.StoreId },
                     commandType: CommandType.StoredProcedure
                     );
                 return true;

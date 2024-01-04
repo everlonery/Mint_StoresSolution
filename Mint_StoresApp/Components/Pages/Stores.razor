@@ -42,7 +42,11 @@
                 <RadzenTextBox @bind-Value="store.Address" Name="StoreAddress"/>
             </EditTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Store" Property="ZipCode" Title="Поштовий індекс" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="Store" Property="ZipCode" Title="Поштовий індекс" Filterable="false" Sortable="false">
+            <EditTemplate Context="store">
+                <RadzenNumeric @bind-Value="store.ZipCode"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="Store" Context="store" Title="Місто" Filterable="false" Sortable="false">
             <Template Context="store">
                 @(cities.Where(city => city.CityId == store.CityId).First().Name)
@@ -107,9 +111,9 @@
 
     async Task OnCreateRow()
     {
-        // if (storeToInsert != null)
-        //     await controller.InsertStore(storeToInsert);
-        // storeToInsert = null;
+        if(storeToInsert!=null)
+            await controller.InsertStore(storeToInsert);
+        storeToInsert = null;
         await Refresh();
     }
 
@@ -134,14 +138,14 @@
 
     async Task DeleteRow(Store store)
     {
-        // Reset();
-        // if (stores != null)
-        // {
-        //     if (stores.Contains(store))
-        //         await controller.DeleteStore(store);
-        //     else
-        //         storesGrid.CancelEditRow(store);
-        // }
+        Reset();
+        if (stores != null)
+        {
+            if (stores.Contains(store))
+                await controller.DeleteStore(store);
+            else
+                storesGrid.CancelEditRow(store);
+        }
         await Refresh();
     }
 

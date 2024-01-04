@@ -1,6 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[sp_Stores_Insert]
-	@param1 int = 0,
-	@param2 int
+	@Name NVARCHAR(50),
+	@Phone NVARCHAR(20),
+	@Email NVARCHAR(50),
+	@Address NVARCHAR(50),
+	@ZipCode int,
+	@CityId int
 AS
-	SELECT @param1, @param2
-RETURN 0
+	INSERT
+	INTO Stores(Name, Phone, Email, Address, ZipCode, CityId)
+	VALUES(@Name, @Phone, @Email, @Address, @ZipCode, @CityId)
