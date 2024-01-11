@@ -1,10 +1,164 @@
 ﻿@page "/products"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
 @rendermode InteractiveServer
-
-<PageTitle>Products</PageTitle>
-
 <h3>Продукти</h3>
 
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(productToInsert != null  || productToUpdate != null)" />
+
+<RadzenDataGrid @ref="productsGrid"
+                Data="@products"
+                TItem="Product"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="Product" Property="ProductId" Title="ID" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="Product" Property="Name" Title="Назва" Filterable="false" Sortable="false">
+            <EditTemplate Context="product">
+                <RadzenTextBox @bind-Value="product.Name" Name="ProductName" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="ProductName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Product" Property="Price" Title="Ціна" Filterable="false" Sortable="false">
+            <EditTemplate Context="product">
+                <RadzenNumeric TValue="double" Format="c" @bind-Value="product.Price"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Product" Context="product" Title="Категорія" Filterable="false" Sortable="false">
+            <Template Context="product">
+                    @if (categories.Where(category => category.CategoryId == product.CategoryId).Any())
+                        @categories.Where(category => category.CategoryId == product.CategoryId).First().Name
+            </Template>
+            <EditTemplate Context="product">
+                <RadzenDropDown Data="@categories" TValue="int" @bind-Value="product.CategoryId" Placeholder="Виберіть категорію" TextProperty="Name" ValueProperty="CategoryId" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Product" Context="product" Filterable="false" Sortable="false">
+            <Template Context="product">
+                <RadzenCheckBox TValue="bool" Value=product.IsForAdults Name="IsAdultCheckBox" Disabled="true"/>
+                <RadzenLabel Text="18+" Component="IsAdultCheckBox" Style="margin-left: 8px; vertical-align: middle;" />
+            </Template>
+            <EditTemplate Context="product">
+                <RadzenCheckBox TValue="bool" Value=product.IsForAdults Disabled="false" Change=@(args => product.IsForAdults = args) Name="IsAdultCheckBox" />
+                <RadzenLabel Text="18+" Component="IsAdultCheckBox" Style="margin-left: 8px; vertical-align: middle;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Product" Context="product" Filterable="false" Sortable="false">
+            <Template Context="product">
+                <RadzenCheckBox TValue="bool" Value=product.IsExcise Name="IsExciseCheckBox" Disabled="true" />
+                <RadzenLabel Text="Акцизний" Component="IsExciseCheckBox" Style="margin-left: 8px; vertical-align: middle;" />
+            </Template>
+            <EditTemplate Context="product">
+                <RadzenCheckBox TValue="bool" Value=product.IsExcise Name="IsExciseCheckBox" Disabled="false" Change=@(args => product.IsExcise = args) />
+                <RadzenLabel Text="Акцизний" Component="IsExciseCheckBox" Style="margin-left: 8px; vertical-align: middle;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Product" Property="PicturePath" Title="Шлях до зображення" Filterable="false" Sortable="false">
+            <EditTemplate Context="product">
+                <RadzenTextBox @bind-Value="product.PicturePath"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Product" Context="product" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="product">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(product))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(product))" />
+            </Template>
+            <EditTemplate Context="product">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(product))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(product))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
 @code {
+    IEnumerable<Product> products = new List<Product>();
+    List<Category> categories = new();
+
+    ProductsController controller = new();
+    CategoriesController categoriesController = new();
+    RadzenDataGrid<Product> productsGrid = new();
+
+    Product? productToInsert;
+    Product? productToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        categories.Clear();
+        categories.AddRange(await categoriesController.SelectCategories());
+        categories.Add(new() { CategoryId = 0, Name = "Немає" });
+        products = await controller.SelectProducts();
+    }
+
+    void Reset()
+    {
+        productToInsert = null;
+        productToUpdate = null;
+    }
+
+    async Task SaveRow(Product product)
+    {
+        await productsGrid.UpdateRow(product);
+    }
+
+    async Task InsertRow()
+    {
+        productToInsert = new Product();
+        await productsGrid.InsertRow(productToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if (productToInsert != null)
+            await controller.InsertProduct(productToInsert);
+        productToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(Product product)
+    {
+        productToUpdate = product;
+        await productsGrid.EditRow(product);
+    }
+
+    async Task OnUpdateRow(Product product)
+    {
+        Reset();
+        await controller.UpdateProduct(product);
+    }
+
+    async Task CancelEdit(Product product)
+    {
+        Reset();
+        productsGrid.CancelEditRow(product);
+        await Refresh();
+    }
+
+    async Task DeleteRow(Product product)
+    {
+        Reset();
+        if (products != null)
+        {
+            if (products.Contains(product))
+                await controller.DeleteProduct(product);
+            else
+                productsGrid.CancelEditRow(product);
+        }
+        await Refresh();
+    }
 
 }

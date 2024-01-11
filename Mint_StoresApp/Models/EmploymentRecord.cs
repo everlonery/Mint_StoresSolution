@@ -5,7 +5,7 @@
         public int Id { get; set; }
         public int StoreId { get; set; }
         public int UserId { get; set; }
-        public DateOnly EmploymentDate { get; set; }
-        public DateOnly TerminationDate { get; set; }
+        public DateTime EmploymentDate { get; set; } = DateTime.Now.Date;
+        public DateTime? TerminationDate { get; set; } = null;
     }
 }

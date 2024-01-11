@@ -19,11 +19,17 @@ namespace Mint_StoresApp
         public const string DeleteStore = "sp_Stores_Delete";
         public const string UpdateStore = "sp_Stores_Update";
         #endregion
-        #region Roles
-        public const string SelectRoles = "sp_Roles_Select";
-        public const string InsertRole = "sp_Roles_Insert";
-        public const string DeleteRole = "sp_Roles_Delete";
-        public const string UpdateRole = "sp_Roles_Update";
+        #region Categories
+        public const string SelectCategories = "sp_Categories_Select";
+        public const string InsertCategory = "sp_Categories_Insert";
+        public const string DeleteCategory = "sp_Categories_Delete";
+        public const string UpdateCategory = "sp_Categories_Update";
+        #endregion
+        #region Products
+        public const string SelectProducts = "sp_Products_Select";
+        public const string InsertProduct = "sp_Products_Insert";
+        public const string DeleteProduct = "sp_Products_Delete";
+        public const string UpdateProduct = "sp_Products_Update";
         #endregion
         #region Units
         public const string SelectUnits = "sp_Units_Select";
@@ -37,18 +43,35 @@ namespace Mint_StoresApp
         public const string DeleteGroup = "sp_Groups_Delete";
         public const string UpdateGroup = "sp_Groups_Update";
         #endregion
+        #region Assortment
+        public const string SelectAssortment = "sp_Assortment_Select";
+        public const string InsertAssortment = "sp_Assortment_Insert";
+        public const string DeleteAssortment = "sp_Assortment_Delete";
+        public const string UpdateAssortment = "sp_Assortment_Update";
+        #endregion
         #region Users
         public const string SelectUsers = "sp_Users_Select";
         public const string InsertUser = "sp_Users_Insert";
         public const string DeleteUser = "sp_Users_Delete";
         public const string UpdateUser = "sp_Users_Update";
         #endregion
-        #region Categories
-        public const string SelectCategories = "sp_Categories_Select";
-        public const string SelectCategory = "sp_Categories_SelectById";
-        public const string InsertCategory = "sp_Categories_Insert";
-        public const string DeleteCategory = "sp_Categories_Delete";
-        public const string UpdateCategory = "sp_Categories_Update";
+        #region Roles
+        public const string SelectRoles = "sp_Roles_Select";
+        public const string InsertRole = "sp_Roles_Insert";
+        public const string DeleteRole = "sp_Roles_Delete";
+        public const string UpdateRole = "sp_Roles_Update";
+        #endregion
+        #region UsersRoles
+        public const string SelectUsersRoles = "sp_UsersRoles_Select";
+        public const string InsertUserRole = "sp_UsersRoles_Insert";
+        public const string DeleteUserRole = "sp_UsersRoles_Delete";
+        public const string UpdateUserRole = "sp_UsersRoles_Update";
+        #endregion
+        #region Employments
+        public const string SelectEmployment = "sp_Employment_Select";
+        public const string InsertEmployment = "sp_Employment_Insert";
+        public const string DeleteEmployment = "sp_Employment_Delete";
+        public const string UpdateEmployment = "sp_Employment_Update";
         #endregion
     }
 }

@@ -1,0 +1,134 @@
+﻿@page "/categories"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
+@rendermode InteractiveServer
+<h3>Категорії</h3>
+
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(categoryToInsert != null  || categoryToUpdate != null)" />
+
+<RadzenDataGrid @ref="categoriesGrid"
+                Data="@categories"
+                TItem="Category"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="Category" Property="CategoryId" Title="ID" Filterable="false" Sortable="false"/>
+        <RadzenDataGridColumn TItem="Category" Property="Name" Title="Назва" Filterable="false" Sortable="false">
+            <EditTemplate Context="category">
+                <RadzenTextBox @bind-Value="category.Name" Name="CategoryName" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="CategoryName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        
+        <RadzenDataGridColumn TItem="Category" Context="category" Title="Категорія" Filterable="false" Sortable="false">            
+            <Template Context="category">
+                    @if (parentCategories.Where(c => c.CategoryId == category.ParentId).Any())
+                        @parentCategories.Where(c => c.CategoryId == category.ParentId).First().Name
+            </Template>
+            <EditTemplate Context="category">
+                 <RadzenDropDown Data="@parentCategories" TValue="int" @bind-Value="category.ParentId" Placeholder="Виберіть категорію" TextProperty="Name" ValueProperty="CategoryId" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Category" Context="category" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="category">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(category))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(category))" />
+            </Template>
+            <EditTemplate Context="category">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(category))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(category))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    IEnumerable<Category> categories = new List<Category>();
+    List<Category> parentCategories = new();
+
+    CategoriesController controller = new();
+    RadzenDataGrid<Category> categoriesGrid = new();
+
+    Category? categoryToInsert;
+    Category? categoryToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        categories = await controller.SelectCategories();
+        parentCategories.Clear();
+        parentCategories.AddRange(categories);
+        parentCategories.Add(new() { CategoryId = 0, Name = "Немає"});
+    }
+
+    void Reset()
+    {
+        categoryToInsert = null;
+        categoryToUpdate = null;
+    }
+
+    async Task SaveRow(Category category)
+    {
+        await categoriesGrid.UpdateRow(category);
+    }
+
+    async Task InsertRow()
+    {
+        categoryToInsert = new Category();
+        await categoriesGrid.InsertRow(categoryToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if (categoryToInsert != null)
+            await controller.InsertCategory(categoryToInsert);
+        categoryToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(Category category)
+    {
+        categoryToUpdate = category;
+        await categoriesGrid.EditRow(category);
+    }
+
+    async Task OnUpdateRow(Category category)
+    {
+        Reset();
+        await controller.UpdateCategory(category);
+    }
+
+    async Task CancelEdit(Category category)
+    {
+        Reset();
+        categoriesGrid.CancelEditRow(category);
+        await Refresh();
+    }
+
+    async Task DeleteRow(Category category)
+    {
+        Reset();
+        if (categories != null)
+        {
+            if (categories.Contains(category))
+                await controller.DeleteCategory(category);
+            else
+                categoriesGrid.CancelEditRow(category);
+        }
+        await Refresh();
+    }
+
+}

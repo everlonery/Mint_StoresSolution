@@ -1,10 +1,174 @@
 ﻿@page "/assortment"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
 @rendermode InteractiveServer
+<h3>Асортимент в магазинах</h3>
 
-<PageTitle>Assortment</PageTitle>
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(recordToInsert != null  || recordToUpdate != null)" />
 
-<h3>Асортимент</h3>
+<RadzenDataGrid @ref="assortmentGrid"
+                Data="@records"
+                TItem="AssortmentRecord"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="AssortmentRecord" Property="Id" Title="ID" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="AssortmentRecord" Context="record" Title="Магазин" Filterable="false" Sortable="false">
+            <Template Context="record">
+                    @if (stores.Where(store => store.StoreId == record.StoreId).Any())
+                        @stores.Where(store => store.StoreId == record.StoreId).First().Name
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDropDown Data="@stores" TValue="int" @bind-Value="record.StoreId" Placeholder="Виберіть магазин" TextProperty="Name" ValueProperty="StoreId" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="AssortmentRecord" Context="record" Title="Продукт" Filterable="false" Sortable="false">
+            <Template Context="record">
+                    @if (products.Where(product => product.ProductId == record.ProductId).Any())
+                        @products.Where(product => product.ProductId == record.ProductId).First().Name
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDropDown Data="@products" TValue="int" @bind-Value="record.ProductId" Placeholder="Виберіть продукт" TextProperty="Name" ValueProperty="ProductId" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="AssortmentRecord" Property="Quantity" Title="Кількість" Filterable="false" Sortable="false">
+            <EditTemplate Context="record">
+                <RadzenNumeric TValue="int" @bind-Value="record.Quantity" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="AssortmentRecord" Context="record" Title="Вимірювання" Filterable="false" Sortable="false">
+            <Template Context="record">
+                    @if (units.Where(unit => unit.Id == record.UnitId).Any())
+                        @units.Where(unit => unit.Id == record.UnitId).First().Name
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDropDown Data="@units" TValue="int" @bind-Value="record.UnitId" Placeholder="Виберіть вимірювання" TextProperty="Name" ValueProperty="Id" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="AssortmentRecord" Context="record" Title="Податкова група" Filterable="false" Sortable="false">
+            <Template Context="record">
+                    @if (groups.Where(group => group.Id == record.TaxGroupId).Any())
+                        @groups.Where(group => group.Id == record.TaxGroupId).First().Name
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDropDown Data="@groups" TValue="int" @bind-Value="record.TaxGroupId" Placeholder="Виберіть податкову групу" TextProperty="Name" ValueProperty="Id" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="AssortmentRecord" Context="record" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="record">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(record))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(record))" />
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(record))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(record))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
 
 @code {
+    IEnumerable<AssortmentRecord> records = new List<AssortmentRecord>();
+    List<Store> stores = new();
+    List<Product> products = new();
+    List<MeasurementUnit> units = new();
+    List<TaxGroup> groups = new();
 
+    AssortmentController controller = new();
+    StoresController storesController = new();
+    ProductsController productsController = new();
+    UnitsController unitsController = new();
+    GroupsController groupsController = new();
+    RadzenDataGrid<AssortmentRecord> assortmentGrid = new();
+
+    AssortmentRecord? recordToInsert;
+    AssortmentRecord? recordToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        stores.Clear();
+        products.Clear();
+        units.Clear();
+        groups.Clear();
+        stores.AddRange(await storesController.SelectStores());
+        products.AddRange(await productsController.SelectProducts());
+        units.AddRange(await unitsController.SelectUnits());
+        groups.AddRange(await groupsController.SelectGroups());
+        stores.Add(new() { StoreId = 0, Name = "Немає" });
+        products.Add(new() { ProductId = 0, Name = "Немає" });
+        units.Add(new() { Id = 0, Name = "Немає" });
+        groups.Add(new() { Id = 0, Name = "Немає" });
+        records = await controller.Select();
+    }
+
+    void Reset()
+    {
+        recordToInsert = null;
+        recordToUpdate = null;
+    }
+
+    async Task SaveRow(AssortmentRecord record)
+    {
+        await assortmentGrid.UpdateRow(record);
+    }
+
+    async Task InsertRow()
+    {
+        recordToInsert = new AssortmentRecord();
+        await assortmentGrid.InsertRow(recordToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if (recordToInsert != null)
+            await controller.Insert(recordToInsert);
+        recordToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(AssortmentRecord record)
+    {
+        recordToUpdate = record;
+        await assortmentGrid.EditRow(record);
+    }
+
+    async Task OnUpdateRow(AssortmentRecord record)
+    {
+        Reset();
+        await controller.Update(record);
+    }
+
+    async Task CancelEdit(AssortmentRecord record)
+    {
+        Reset();
+        assortmentGrid.CancelEditRow(record);
+        await Refresh();
+    }
+
+    async Task DeleteRow(AssortmentRecord record)
+    {
+        Reset();
+        if (records != null)
+        {
+            if (records.Contains(record))
+                await controller.Delete(record);
+            else
+                assortmentGrid.CancelEditRow(record);
+        }
+        await Refresh();
+    }
 }

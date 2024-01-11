@@ -6,20 +6,7 @@ namespace Mint_StoresApp.DataControllers
 {
     public class CitiesController
     {
-        public async Task<List<City>> SelectCities()
-        {
-            using (var connection = DatabaseConstans.GetConnection())
-            {
-                connection.Open();
-                var rows = await connection.QueryAsync<City>(
-                    DatabaseConstans.SelectCities,
-                    commandType: CommandType.StoredProcedure
-                    );
-                return rows.ToList();
-            }
-        }
-
-        public async Task<IEnumerable<City>> SelectCities_Radzen()
+        public async Task<IEnumerable<City>> SelectCities()
         {
             using (var connection = DatabaseConstans.GetConnection())
             {

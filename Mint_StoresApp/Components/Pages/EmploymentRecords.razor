@@ -1,10 +1,159 @@
 ﻿@page "/employment"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
 @rendermode InteractiveServer
-
-<PageTitle>Employment</PageTitle>
-
 <h3>Працевлаштування</h3>
 
-@code {
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(recordToInsert != null  || recordToUpdate != null)" />
 
+<RadzenDataGrid @ref="employmentGrid"
+                Data="@records"
+                TItem="EmploymentRecord"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="EmploymentRecord" Property="Id" Title="ID" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="EmploymentRecord" Context="record" Title="Магазин" Filterable="false" Sortable="false">
+            <Template Context="record">
+                    @if (stores.Where(store => store.StoreId == record.StoreId).Any())
+                        @stores.Where(store => store.StoreId == record.StoreId).First().Name
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDropDown Data="@stores" TValue="int" @bind-Value="record.StoreId" Placeholder="Виберіть магазин" TextProperty="Name" ValueProperty="StoreId" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="EmploymentRecord" Context="record" Title="Користувач" Filterable="false" Sortable="false">
+            <Template Context="record">
+                    @if (users.Where(user => user.UserId == record.UserId).Any())
+                        @users.Where(user => user.UserId == record.UserId).First().UserId
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDropDown Data="@users" TValue="int" @bind-Value="record.UserId" Placeholder="Виберіть користувача" TextProperty="UserId" ValueProperty="UserId" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="EmploymentRecord" Title="Дата працевлаштування" Filterable="false" Sortable="false">
+            <Template Context="record">
+                @record.EmploymentDate
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDatePicker @bind-Value=record.EmploymentDate DateFormat="d" ShowCalendarWeek />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="EmploymentRecord" Title="Дата звільнення" Filterable="false" Sortable="false">
+            <Template Context="record">
+                @record.TerminationDate
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDatePicker @bind-Value=record.TerminationDate DateFormat="d" ShowCalendarWeek />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="EmploymentRecord" Context="record" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="record">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(record))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(record))" />
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(record))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(record))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    IEnumerable<EmploymentRecord> records = new List<EmploymentRecord>();
+    List<Store> stores = new();
+    List<User> users = new();
+
+    EmploymentController controller = new();
+    StoresController storesController = new();
+    UsersController usersController = new();
+
+    RadzenDataGrid<EmploymentRecord> employmentGrid = new();
+
+    EmploymentRecord? recordToInsert;
+    EmploymentRecord? recordToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        stores.Clear();
+        users.Clear();
+        stores.AddRange(await storesController.SelectStores());
+        stores.Add(new() { StoreId = 0, Name = "Немає" });
+        users.AddRange(await usersController.SelectUsers());
+        users.Add(new() { UserId = 0 });
+        records = await controller.Select();
+    }
+
+    void Reset()
+    {
+        recordToInsert = null;
+        recordToUpdate = null;
+    }
+
+    async Task SaveRow(EmploymentRecord record)
+    {
+        await employmentGrid.UpdateRow(record);
+    }
+
+    async Task InsertRow()
+    {
+        recordToInsert = new EmploymentRecord();
+        await employmentGrid.InsertRow(recordToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if (recordToInsert != null)
+            await controller.Insert(recordToInsert);
+        recordToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(EmploymentRecord record)
+    {
+        recordToUpdate = record;
+        await employmentGrid.EditRow(record);
+    }
+
+    async Task OnUpdateRow(EmploymentRecord record)
+    {
+        Reset();
+        await controller.Update(record);
+    }
+
+    async Task CancelEdit(EmploymentRecord record)
+    {
+        Reset();
+        employmentGrid.CancelEditRow(record);
+        await Refresh();
+    }
+
+    async Task DeleteRow(EmploymentRecord record)
+    {
+        Reset();
+        if (records != null)
+        {
+            if (records.Contains(record))
+                await controller.Delete(record);
+            else
+                employmentGrid.CancelEditRow(record);
+        }
+        await Refresh();
+    }
 }

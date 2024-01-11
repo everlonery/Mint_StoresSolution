@@ -1,0 +1,119 @@
+﻿@page "/units"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
+@rendermode InteractiveServer
+<h3>Одиниці вимірювання</h3>
+
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(unitToInsert != null  || unitToUpdate != null)" />
+
+<RadzenDataGrid @ref="unitsGrid"
+                Data="@units"
+                TItem="MeasurementUnit"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="MeasurementUnit" Property="Id" Title="ID" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="MeasurementUnit" Property="Name" Title="Назва" Filterable="false" Sortable="false">
+            <EditTemplate Context="unit">
+                <RadzenTextBox @bind-Value="unit.Name" Name="UnitName" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="UnitName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="MeasurementUnit" Context="unit" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="unit">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(unit))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(unit))" />
+            </Template>
+            <EditTemplate Context="unit">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(unit))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(unit))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    IEnumerable<MeasurementUnit> units = new List<MeasurementUnit>();
+    UnitsController controller = new();
+    RadzenDataGrid<MeasurementUnit> unitsGrid = new();
+
+    MeasurementUnit? unitToInsert;
+    MeasurementUnit? unitToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        units = await controller.SelectUnits();
+    }
+
+    void Reset()
+    {
+        unitToInsert = null;
+        unitToUpdate = null;
+    }
+
+    async Task SaveRow(MeasurementUnit unit)
+    {
+        await unitsGrid.UpdateRow(unit);
+    }
+
+    async Task InsertRow()
+    {
+        unitToInsert = new MeasurementUnit();
+        await unitsGrid.InsertRow(unitToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if (unitToInsert != null)
+            await controller.InsertUnit(unitToInsert);
+        unitToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(MeasurementUnit unit)
+    {
+        unitToUpdate = unit;
+        await unitsGrid.EditRow(unit);
+    }
+
+    async Task OnUpdateRow(MeasurementUnit unit)
+    {
+        Reset();
+        await controller.UpdateUnit(unit);
+    }
+
+    async Task CancelEdit(MeasurementUnit unit)
+    {
+        Reset();
+        unitsGrid.CancelEditRow(unit);
+        await Refresh();
+    }
+
+    async Task DeleteRow(MeasurementUnit unit)
+    {
+        Reset();
+        if (units != null)
+        {
+            if (units.Contains(unit))
+                await controller.DeleteUnit(unit);
+            else
+                unitsGrid.CancelEditRow(unit);
+        }
+        await Refresh();
+    }
+
+}

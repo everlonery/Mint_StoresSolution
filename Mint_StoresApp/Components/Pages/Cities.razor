@@ -1,4 +1,4 @@
-﻿@page "/cities-radzen"
+﻿@page "/cities"
 @using Mint_StoresApp.DataControllers
 @using Mint_StoresApp.Models
 @rendermode InteractiveServer
@@ -18,8 +18,8 @@
     RowCreate="@OnCreateRow"
     RowUpdate="@OnUpdateRow">
     <Columns>
-        <RadzenDataGridColumn TItem="City" Property="CityId" Title="ID" Frozen="true"/>
-        <RadzenDataGridColumn TItem="City" Property="Name" Title="Назва">
+        <RadzenDataGridColumn TItem="City" Property="CityId" Title="ID" Frozen="true" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="City" Property="Name" Title="Назва" Filterable="false" Sortable="false">
             <EditTemplate Context="city">
                 <RadzenTextBox @bind-Value="city.Name" Name="CityName"/>
                 <RadzenRequiredValidator Text="Поле не має бути пустим!" Component="CityName" Popup="true"/>
@@ -53,7 +53,7 @@
 
     async Task Refresh()
     {
-        cities = await controller.SelectCities_Radzen();
+        cities = await controller.SelectCities();
     }
 
     void Reset()

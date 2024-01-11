@@ -47,14 +47,17 @@
                 <RadzenNumeric @bind-Value="store.ZipCode"/>
             </EditTemplate>
         </RadzenDataGridColumn>
+
         <RadzenDataGridColumn TItem="Store" Context="store" Title="Місто" Filterable="false" Sortable="false">
             <Template Context="store">
-                @(cities.Where(city => city.CityId == store.CityId).First().Name)
+                    @if (cities.Where(city => city.CityId == store.CityId).Any())
+                        @cities.Where(city => city.CityId == store.CityId).First().Name
             </Template>
-            <EditTemplate Context="store">
-                <RadzenDropDown Data="@cities" TValue="int" @bind-Value="store.CityId" Placeholder="Виберіть місто" TextProperty="Name" ValueProperty="CityId"/>
+            <EditTemplate Context="record">
+                <RadzenDropDown Data="@cities" TValue="int" @bind-Value="record.CityId" Placeholder="Виберіть місто" TextProperty="Name" ValueProperty="CityId"/>
             </EditTemplate>
         </RadzenDataGridColumn>
+
         <RadzenDataGridColumn TItem="Store" Context="store" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
             <Template Context="store">
                 <RadzenButton Icon="edit" Click="@(args => EditRow(store))" @onclick:stopPropagation="true" />
@@ -70,7 +73,7 @@
 
 @code {
     IEnumerable<Store>? stores;
-    IEnumerable<City> cities = new List<City>();
+    List<City> cities = new List<City>();
 
     StoresController controller = new();
     CitiesController citiesController = new();
@@ -81,14 +84,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var data = await citiesController.SelectCities();
-        if (data != null)
-            cities = data;
         await Refresh();
     }
 
     async Task Refresh()
     {
+        cities.Clear();
+        cities.AddRange(await citiesController.SelectCities());
+        cities.Add(new() { CityId = 0, Name = "Немає" });
         stores = await controller.SelectStores();
     }
 

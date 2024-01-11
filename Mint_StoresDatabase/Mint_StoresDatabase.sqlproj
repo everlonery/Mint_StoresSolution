@@ -65,6 +65,10 @@
     <Folder Include="StoredProcedures\TaxGroups" />
     <Folder Include="StoredProcedures\Categories" />
     <Folder Include="StoredProcedures\Stores" />
+    <Folder Include="StoredProcedures\Products" />
+    <Folder Include="StoredProcedures\AssortmentRecords" />
+    <Folder Include="StoredProcedures\UsersRoles" />
+    <Folder Include="StoredProcedures\Employment" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Products.sql" />
@@ -102,11 +106,26 @@
     <Build Include="StoredProcedures\Categories\sp_Categories_Insert.sql" />
     <Build Include="StoredProcedures\Categories\sp_Categories_Select.sql" />
     <Build Include="StoredProcedures\Categories\sp_Categories_Update.sql" />
-    <Build Include="StoredProcedures\Categories\sp_Categories_SelectById.sql" />
     <Build Include="StoredProcedures\Stores\sp_Stores_Delete.sql" />
     <Build Include="StoredProcedures\Stores\sp_Stores_Insert.sql" />
     <Build Include="StoredProcedures\Stores\sp_Stores_Select.sql" />
     <Build Include="StoredProcedures\Stores\sp_Stores_Update.sql" />
+    <Build Include="StoredProcedures\Products\sp_Products_Select.sql" />
+    <Build Include="StoredProcedures\Products\sp_Products_Insert.sql" />
+    <Build Include="StoredProcedures\Products\sp_Products_Update.sql" />
+    <Build Include="StoredProcedures\Products\sp_Products_Delete.sql" />
+    <Build Include="StoredProcedures\AssortmentRecords\sp_Assortment_Select.sql" />
+    <Build Include="StoredProcedures\AssortmentRecords\sp_Assortment_Insert.sql" />
+    <Build Include="StoredProcedures\AssortmentRecords\sp_Assortment_Update.sql" />
+    <Build Include="StoredProcedures\AssortmentRecords\sp_Assortment_Delete.sql" />
+    <Build Include="StoredProcedures\UsersRoles\sp_UsersRoles_Update.sql" />
+    <Build Include="StoredProcedures\UsersRoles\sp_UsersRoles_Select.sql" />
+    <Build Include="StoredProcedures\UsersRoles\sp_UsersRoles_Insert.sql" />
+    <Build Include="StoredProcedures\UsersRoles\sp_UsersRoles_Delete.sql" />
+    <Build Include="StoredProcedures\Employment\sp_Employment_Select.sql" />
+    <Build Include="StoredProcedures\Employment\sp_Employment_Update.sql" />
+    <Build Include="StoredProcedures\Employment\sp_Employment_Insert.sql" />
+    <Build Include="StoredProcedures\Employment\sp_Employment_Delete.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="Mint_StoresDatabase.refactorlog" />

@@ -1,0 +1,119 @@
+﻿@page "/roles"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
+@rendermode InteractiveServer
+<h3>Ролі</h3>
+
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(roleToInsert != null  || roleToUpdate != null)" />
+
+<RadzenDataGrid @ref="rolesGrid"
+                Data="@roles"
+                TItem="Role"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="Role" Property="RoleId" Title="ID" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="Role" Property="Name" Title="Назва" Filterable="false" Sortable="false">
+            <EditTemplate Context="role">
+                <RadzenTextBox @bind-Value="role.Name" Name="RoleName" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="RoleName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Role" Context="role" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="role">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(role))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(role))" />
+            </Template>
+            <EditTemplate Context="role">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(role))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(role))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    IEnumerable<Role> roles = new List<Role>();
+    RolesController controller = new();
+    RadzenDataGrid<Role> rolesGrid = new();
+
+    Role? roleToInsert;
+    Role? roleToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        roles = await controller.SelectRoles();
+    }
+
+    void Reset()
+    {
+        roleToInsert = null;
+        roleToUpdate = null;
+    }
+
+    async Task SaveRow(Role role)
+    {
+        await rolesGrid.UpdateRow(role);
+    }
+
+    async Task InsertRow()
+    {
+        roleToInsert = new Role();
+        await rolesGrid.InsertRow(roleToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if (roleToInsert != null)
+            await controller.InsertRole(roleToInsert);
+        roleToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(Role role)
+    {
+        roleToUpdate = role;
+        await rolesGrid.EditRow(role);
+    }
+
+    async Task OnUpdateRow(Role role)
+    {
+        Reset();
+        await controller.UpdateRole(role);
+    }
+
+    async Task CancelEdit(Role role)
+    {
+        Reset();
+        rolesGrid.CancelEditRow(role);
+        await Refresh();
+    }
+
+    async Task DeleteRow(Role role)
+    {
+        Reset();
+        if (roles != null)
+        {
+            if (roles.Contains(role))
+                await controller.DeleteRole(role);
+            else
+                rolesGrid.CancelEditRow(role);
+        }
+        await Refresh();
+    }
+
+}

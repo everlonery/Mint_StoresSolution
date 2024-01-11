@@ -1,0 +1,119 @@
+﻿@page "/groups"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
+@rendermode InteractiveServer
+<h3>Податкові групи</h3>
+
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(groupToInsert != null  || groupToUpdate != null)" />
+
+<RadzenDataGrid @ref="groupsGrid"
+                Data="@groups"
+                TItem="TaxGroup"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="TaxGroup" Property="Id" Title="ID" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="TaxGroup" Property="Name" Title="Назва" Filterable="false" Sortable="false">
+            <EditTemplate Context="group">
+                <RadzenTextBox @bind-Value="group.Name" Name="GroupName" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="GroupName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="TaxGroup" Context="group" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="group">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(group))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(group))" />
+            </Template>
+            <EditTemplate Context="group">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(group))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(group))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    IEnumerable<TaxGroup> groups = new List<TaxGroup>();
+    GroupsController controller = new();
+    RadzenDataGrid<TaxGroup> groupsGrid = new();
+
+    TaxGroup? groupToInsert;
+    TaxGroup? groupToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        groups = await controller.SelectGroups();
+    }
+
+    void Reset()
+    {
+        groupToInsert = null;
+        groupToUpdate = null;
+    }
+
+    async Task SaveRow(TaxGroup group)
+    {
+        await groupsGrid.UpdateRow(group);
+    }
+
+    async Task InsertRow()
+    {
+        groupToInsert = new TaxGroup();
+        await groupsGrid.InsertRow(groupToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if (groupToInsert != null)
+            await controller.InsertGroup(groupToInsert);
+        groupToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(TaxGroup group)
+    {
+        groupToUpdate = group;
+        await groupsGrid.EditRow(group);
+    }
+
+    async Task OnUpdateRow(TaxGroup group)
+    {
+        Reset();
+        await controller.UpdateGroup(group);
+    }
+
+    async Task CancelEdit(TaxGroup group)
+    {
+        Reset();
+        groupsGrid.CancelEditRow(group);
+        await Refresh();
+    }
+
+    async Task DeleteRow(TaxGroup group)
+    {
+        Reset();
+        if (groups != null)
+        {
+            if (groups.Contains(group))
+                await controller.DeleteGroup(group);
+            else
+                groupsGrid.CancelEditRow(group);
+        }
+        await Refresh();
+    }
+
+}

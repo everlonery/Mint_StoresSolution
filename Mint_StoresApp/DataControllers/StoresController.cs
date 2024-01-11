@@ -26,7 +26,7 @@ namespace Mint_StoresApp.DataControllers
                 connection.Open();
                 var rows = await connection.QueryAsync<Store>(
                     DatabaseConstans.InsertStore,
-                    new { Name = store.Name, Phone = store.Phone, Email = store.Email, Address = store.Address, ZipCode = store.ZipCode, CityId = store.CityId},
+                    new { Name = store.Name, Phone = store.Phone, Email = store.Email, Address = store.Address, ZipCode = store.ZipCode, CityId = store.CityId==0?null:(int?)store.CityId},
                     commandType: CommandType.StoredProcedure
                     );
                 return true;
@@ -52,7 +52,7 @@ namespace Mint_StoresApp.DataControllers
                 connection.Open();
                 var rows = await connection.QueryAsync<Store>(
                     DatabaseConstans.UpdateStore,
-                    new { StoreId = store.StoreId, Name = store.Name, Phone = store.Phone, Email = store.Email, Address = store.Address, ZipCode = store.ZipCode, CityId = store.CityId},
+                    new { StoreId = store.StoreId, Name = store.Name, Phone = store.Phone, Email = store.Email, Address = store.Address, ZipCode = store.ZipCode, CityId = store.CityId == 0 ? null : (int?)store.CityId },
                     commandType: CommandType.StoredProcedure
                     );
                 return true;

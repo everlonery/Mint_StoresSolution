@@ -1,0 +1,161 @@
+﻿@page "/users"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
+@rendermode InteractiveServer
+<h3>Користувачі</h3>
+
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(userToInsert != null  || userToUpdate != null)"/>
+<RadzenDataGrid @ref="usersGrid"
+                Data="@users"
+                TItem="User"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="User" Property="UserId" Title="ID" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="User" Property="LastName" Title="Прізвище" Filterable="false" Sortable="false">
+            <EditTemplate Context="user">
+                <RadzenTextBox @bind-Value="user.LastName" Name="UserLastName" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="UserLastName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="User" Property="FirstName" Title="Ім'я" Filterable="false" Sortable="false">
+            <EditTemplate Context="user">
+                <RadzenTextBox @bind-Value="user.FirstName" Name="UserFirstName" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="UserFirstName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="User" Property="ParentName" Title="По-батькові" Filterable="false" Sortable="false">
+            <EditTemplate Context="user">
+                <RadzenTextBox @bind-Value="user.ParentName" Name="UserParentName" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="UserParentName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="User" Title="Дата народження" Filterable="false" Sortable="false">
+            <Template Context="user">
+                @user.BirthDate.ToShortDateString()
+            </Template>
+            <EditTemplate Context="user">
+                <RadzenDatePicker @bind-Value=user.BirthDate DateFormat="d" ShowCalendarWeek />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="User" Context="user" Filterable="false" Sortable="false">
+            <Template Context="user">
+                <RadzenCheckBox TValue="bool" Value=user.IsActive Name="IsActiveCheckBox" Disabled="true"/>
+                <RadzenLabel Text="Працює" Component="IsActiveCheckBox" Style="margin-left: 8px; vertical-align: middle;" />
+            </Template>
+            <EditTemplate Context="user">
+                <RadzenCheckBox TValue="bool" Value=user.IsActive Name="IsActiveCheckBox" Disabled="false" Change="@(args=>user.IsActive=args)"/>
+                <RadzenLabel Text="Працює" Component="IsActiveCheckBox" Style="margin-left: 8px; vertical-align: middle;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="User" Property="Phone" Title="Телефон" Filterable="false" Sortable="false">
+            <EditTemplate Context="user">
+                <RadzenTextBox @bind-Value="user.Phone" Name="UserPhone" />
+                <RadzenRequiredValidator Text="Обов'язкове поле!'" Component="UserPhone" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="User" Property="Email" Title="E-mail" Filterable="false" Sortable="false">
+            <EditTemplate Context="user">
+                <RadzenTextBox @bind-Value="user.Email"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="User" Context="user" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="user">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(user))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(user))" />
+            </Template>
+            <EditTemplate Context="user">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(user))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(user))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    IEnumerable<User> users = new List<User>();
+
+    UsersController controller = new();
+    RadzenDataGrid<User> usersGrid = new();
+
+    User? userToInsert;
+    User? userToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        users = await controller.SelectUsers();
+    }
+
+    void Reset()
+    {
+        userToInsert = null;
+        userToUpdate = null;
+    }
+
+    async Task SaveRow(User user)
+    {
+        await usersGrid.UpdateRow(user);
+    }
+
+    async Task InsertRow()
+    {
+        userToInsert = new User();
+        userToInsert.BirthDate = DateTime.Today;
+        await usersGrid.InsertRow(userToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if (userToInsert != null)
+            await controller.InsertUser(userToInsert);
+        userToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(User user)
+    {
+        userToUpdate = user;
+        await usersGrid.EditRow(user);
+    }
+
+    async Task OnUpdateRow(User user)
+    {
+        Reset();
+        await controller.UpdateUser(user);
+    }
+
+    async Task CancelEdit(User user)
+    {
+        Reset();
+        usersGrid.CancelEditRow(user);
+        await Refresh();
+    }
+
+    async Task DeleteRow(User user)
+    {
+        Reset();
+        if (users != null)
+        {
+            if (users.Contains(user))
+                await controller.DeleteUser(user);
+            else
+                usersGrid.CancelEditRow(user);
+        }
+        await Refresh();
+    }
+
+}

@@ -1,10 +1,142 @@
 ﻿@page "/usersroles"
+@using Mint_StoresApp.DataControllers
+@using Mint_StoresApp.Models
 @rendermode InteractiveServer
+<h3>Призначення</h3>
 
-<PageTitle>Users-Roles</PageTitle>
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Click="@InsertRow" Disabled="@(recordToInsert != null  || recordToUpdate != null)" />
 
-<h3>Призначення ролей</h3>
+<RadzenDataGrid @ref="usersRolesGrid"
+                Data="@records"
+                TItem="UserRole"
+                AllowSorting="true"
+                AllowMultiColumnSorting="true"
+                AllowColumnResize="true"
+                AllowPaging="true"
+                PageSize="5"
+                AllowFiltering="true"
+                FilterMode="FilterMode.Simple"
+                EditMode="DataGridEditMode.Single"
+                RowCreate="@OnCreateRow"
+                RowUpdate="@OnUpdateRow">
+    <Columns>
+        <RadzenDataGridColumn TItem="UserRole" Property="Id" Title="ID" Filterable="false" Sortable="false" />
+        <RadzenDataGridColumn TItem="UserRole" Context="record" Title="Користувач" Filterable="false" Sortable="false">
+            <Template Context="record">
+                    @if (users.Where(user => user.UserId == record.UserId).Any())
+                        @users.Where(user => user.UserId == record.UserId).First().UserId
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDropDown Data="@users" TValue="int" @bind-Value="record.UserId" Placeholder="Виберіть користувача" TextProperty="UserId" ValueProperty="UserId" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="UserRole" Context="record" Title="Роль" Filterable="false" Sortable="false">
+            <Template Context="record">
+                    @if (roles.Where(roles => roles.RoleId == record.RoleId).Any())
+                        @roles.Where(roles => roles.RoleId == record.RoleId).First().Name
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenDropDown Data="@roles" TValue="int" @bind-Value="record.RoleId" Placeholder="Виберіть роль" TextProperty="Name" ValueProperty="RoleId" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="UserRole" Context="record" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="record">
+                <RadzenButton Icon="edit" Click="@(args => EditRow(record))" @onclick:stopPropagation="true" />
+                <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Warning" Click="@(args => DeleteRow(record))" />
+            </Template>
+            <EditTemplate Context="record">
+                <RadzenButton Icon="save" ButtonStyle="ButtonStyle.Success" Click="@((args) => SaveRow(record))" />
+                <RadzenButton Icon="cancel" ButtonStyle="ButtonStyle.Danger" Click="@((args) => CancelEdit(record))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
 
 @code {
+    IEnumerable<UserRole> records = new List<UserRole>();
+    List<User> users = new();
+    List<Role> roles = new();
 
+    UsersRolesController controller = new();
+    UsersController usersController = new();
+    RolesController rolesController = new();
+    RadzenDataGrid<UserRole> usersRolesGrid = new();
+
+    UserRole? recordToInsert;
+    UserRole? recordToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        await Refresh();
+    }
+
+    async Task Refresh()
+    {
+        users.Clear();
+        roles.Clear();
+        users = await usersController.SelectUsers();
+        roles = await rolesController.SelectRoles();
+        users.Add(new() { UserId = 0 });
+        roles.Add(new() { RoleId = 0, Name = "Немає" });
+        records = await controller.Select();
+    }
+
+    void Reset()
+    {
+        recordToInsert = null;
+        recordToUpdate = null;
+    }
+
+    async Task SaveRow(UserRole record)
+    {
+        await usersRolesGrid.UpdateRow(record);
+    }
+
+    async Task InsertRow()
+    {
+        recordToInsert = new UserRole();
+        await usersRolesGrid.InsertRow(recordToInsert);
+    }
+
+    async Task OnCreateRow()
+    {
+        if (recordToInsert != null)
+            await controller.Insert(recordToInsert);
+        recordToInsert = null;
+        await Refresh();
+    }
+
+    async Task EditRow(UserRole record)
+    {
+        recordToUpdate = record;
+        await usersRolesGrid.EditRow(record);
+    }
+
+    async Task OnUpdateRow(UserRole record)
+    {
+        Reset();
+        await controller.Update(record);
+    }
+
+    async Task CancelEdit(UserRole record)
+    {
+        Reset();
+        usersRolesGrid.CancelEditRow(record);
+        await Refresh();
+    }
+
+    async Task DeleteRow(UserRole record)
+    {
+        Reset();
+        if (records != null)
+        {
+            if (records.Contains(record))
+                await controller.Delete(record);
+            else
+                usersRolesGrid.CancelEditRow(record);
+        }
+        await Refresh();
+    }
 }
